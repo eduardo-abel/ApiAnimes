@@ -56,7 +56,7 @@ http://localhost:5050
 
 ## Exemplo de PUT
 
-```json
+
 {
   "nome": "Dragon Ball Z Kai",
   "genero": "Ação",
@@ -75,9 +75,9 @@ Isso significa que os dados cadastrados são perdidos quando a aplicação é en
 
 A coleção do Bruno está localizada na pasta:
 
-```text
+
 bruno
-```
+
 
 Ela contém os testes dos principais endpoints da API.
 
@@ -85,6 +85,4 @@ Ela contém os testes dos principais endpoints da API.
 
 Link do vídeo público:
 
-```text
-COLOCAR O LINK DO VÍDEO AQUI
-```
+https://youtu.be/QqkC0bnB9tU
