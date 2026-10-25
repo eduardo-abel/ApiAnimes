@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Animes</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 30px;
+            color: #222;
+        }
+
+        main {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        h1 {
+            color: #5638a8;
+            text-align: center;
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        input, button {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 6px;
+        }
+
+        input {
+            border: 1px solid #ccc;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            background: #5638a8;
+            color: white;
+        }
+
+        .anime {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .acoes {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .excluir {
+            background: #c0392b;
+        }
+
+        #mensagem {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+<main>
+    <h1>🎌 Gerenciador de Animes</h1>
+
+    <h2 id="titulo-form">Cadastrar anime</h2>
+
+    <form id="form-anime">
+        <input type="text" id="nome" placeholder="Nome do anime" required>
+        <input type="text" id="genero" placeholder="Gênero" required>
+        <input type="number" id="episodios" placeholder="Quantidade de episódios" min="1" required>
+        <input type="number" id="ano" placeholder="Ano de lançamento" min="1900" required>
+
+        <button type="submit" id="btn-salvar">Cadastrar anime</button>
+        <button type="button" id="btn-cancelar" hidden>Cancelar edição</button>
+    </form>
+
+    <p id="mensagem" role="status"></p>
+
+    <h2>Animes cadastrados</h2>
+    <section id="lista-animes">Carregando animes...</section>
+</main>
+
+<script>
+    const API = "/api/animes";
+    const formulario = document.getElementById("form-anime");
+    const lista = document.getElementById("lista-animes");
+    const mensagem = document.getElementById("mensagem");
+
+    let idEdicao = null;
+
+    async function carregarAnimes() {
+        try {
+            const resposta = await fetch(API);
+
+            if (!resposta.ok) {
+                throw new Error("Não foi possível carregar os animes.");
+            }
+
+            const animes = await resposta.json();
+            lista.replaceChildren();
+
+            if (animes.length === 0) {
+                lista.textContent = "Nenhum anime cadastrado.";
+                return;
+            }
+
+            animes.forEach(anime => {
+                const card = document.createElement("article");
+                card.className = "anime";
+
+                const titulo = document.createElement("h3");
+                titulo.textContent = anime.nome;
+
+                const detalhes = document.createElement("p");
+                detalhes.textContent =
+                    `Gênero: ${anime.genero} | Episódios: ${anime.episodios} | Ano: ${anime.anoLancamento}`;
+
+                const acoes = document.createElement("div");
+                acoes.className = "acoes";
+
+                const editar = document.createElement("button");
+                editar.textContent = "Editar";
+                editar.addEventListener("click", () => editarAnime(anime));
+
+                const excluir = document.createElement("button");
+                excluir.textContent = "Excluir";
+                excluir.className = "excluir";
+                excluir.addEventListener("click", () => excluirAnime(anime.id));
+
+                acoes.append(editar, excluir);
+                card.append(titulo, detalhes, acoes);
+                lista.append(card);
+            });
+        } catch (erro) {
+            lista.textContent = erro.message;
+        }
+    }
+
+    function editarAnime(anime) {
+        idEdicao = anime.id;
+
+        document.getElementById("nome").value = anime.nome;
+        document.getElementById("genero").value = anime.genero;
+        document.getElementById("episodios").value = anime.episodios;
+        document.getElementById("ano").value = anime.anoLancamento;
+
+        document.getElementById("titulo-form").textContent = "Editar anime";
+        document.getElementById("btn-salvar").textContent = "Salvar alterações";
+        document.getElementById("btn-cancelar").hidden = false;
+
+        formulario.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function cancelarEdicao() {
+        idEdicao = null;
+        formulario.reset();
+
+        document.getElementById("titulo-form").textContent = "Cadastrar anime";
+        document.getElementById("btn-salvar").textContent = "Cadastrar anime";
+        document.getElementById("btn-cancelar").hidden = true;
+    }
+
+    document.getElementById("btn-cancelar").addEventListener("click", cancelarEdicao);
+
+    formulario.addEventListener("submit", async evento => {
+        evento.preventDefault();
+
+        const anime = {
+            nome: document.getElementById("nome").value.trim(),
+            genero: document.getElementById("genero").value.trim(),
+            episodios: Number(document.getElementById("episodios").value),
+            anoLancamento: Number(document.getElementById("ano").value)
+        };
+
+        try {
+            const resposta = await fetch(
+                idEdicao === null ? API : `${API}/${idEdicao}`,
+                {
+                    method: idEdicao === null ? "POST" : "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(anime)
+                }
+            );
+
+            if (!resposta.ok) {
+                throw new Error("Não foi possível salvar o anime.");
+            }
+
+            mensagem.textContent = idEdicao === null
+                ? "Anime cadastrado com sucesso!"
+                : "Anime atualizado com sucesso!";
+
+            cancelarEdicao();
+            await carregarAnimes();
+        } catch (erro) {
+            mensagem.textContent = erro.message;
+        }
+    });
+
+    async function excluirAnime(id) {
+        if (!confirm("Deseja excluir este anime?")) return;
+
+        try {
+            const resposta = await fetch(`${API}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (!resposta.ok) {
+                throw new Error("Não foi possível excluir o anime.");
+            }
+
+            mensagem.textContent = "Anime excluído com sucesso!";
+            await carregarAnimes();
+        } catch (erro) {
+            mensagem.textContent = erro.message;
+        }
+    }
+
+    carregarAnimes();
+</script>
+</body>
+</html>

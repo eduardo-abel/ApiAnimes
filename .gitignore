@@ -1,2 +1,10 @@
 bin/
+obj/animes.db
+# Arquivos gerados pelo .NET
+bin/
 obj/
+
+# Banco de dados SQLite local
+animes.db
+animes.db-shm
+animes.db-wal
