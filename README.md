@@ -102,4 +102,4 @@ https://youtu.be/QqkC0bnB9tU
 
 **Vídeo da AP2:**
 
-Adicionar aqui o link público do novo vídeo demonstrando a API, a interface web, o banco SQLite e os testes realizados.
+https://youtu.be/tP6s0QzsLSs
