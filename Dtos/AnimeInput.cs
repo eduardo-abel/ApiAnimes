@@ -1,4 +1,4 @@
-namespace ApiAnimes.Models;
+namespace ApiAnimes.Dtos;
 
 public record AnimeInput(
     string Nome,

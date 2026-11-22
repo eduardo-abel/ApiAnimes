@@ -2,6 +2,7 @@
 using ApiAnimes.Data;
 using ApiAnimes.Models;
 using Microsoft.EntityFrameworkCore;
+using ApiAnimes.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
 
